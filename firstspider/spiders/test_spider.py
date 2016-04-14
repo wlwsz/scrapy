@@ -1,17 +1,18 @@
 import scrapy
 from firstspider.items import FirstspiderItem
 from scrapy.http import Request
+from scrapy.crawler import CrawlerProcess
+from scrapy.utils.project import get_project_settings
 import logging
 
 logger = logging.getLogger(__name__)
 
-class TestSpider(scrapy.Spider):
+class PaiToday(scrapy.Spider):
     name = "test"
-    allowed_domains = ["suning.org"]
+    allowed_domains = ["suning.com"]
     start_urls = [
         "http://pai.suning.com"
         
-
     ]
 
     def parse(self,response):
@@ -33,5 +34,23 @@ class TestSpider(scrapy.Spider):
             item['link'] = [t.encode("gbk") for t in link]
             logger.info(item) 
             yield item
+class PaiTomorrow(scrapy.Spider):
+    name = 'test2'
+    allowed_domains = ["suning.com"]
+    start_urls = [
+        "http://pai.suning.com/shanpai/tomorrow.htm"
+    ]
+
+    def parse(self,response):
+        item = FirstspiderItem()
+        for sel in response.xpath('//div[@class="list-img"]'):
+            title = sel.xpath('a/@title').extract()
+            link = sel.xpath('a/@href').extract()
+            desc = sel.xpath('a/@title').extract()
+            item['title'] = [t.encode('gbk') for t in title]
+            item['link'] = [t.encode('gbk') for t in link]
+            item['desc'] = [t.encode('gbk') for t in desc]
+            yield item
+
         
              
