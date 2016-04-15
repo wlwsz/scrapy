@@ -50,6 +50,7 @@ class PaiTomorrow(scrapy.Spider):
             item['title'] = [t.encode('gbk') for t in title]
             item['link'] = [t.encode('gbk') for t in link]
             item['desc'] = [t.encode('gbk') for t in desc]
+            logger.info(item) 
             yield item
 
         
