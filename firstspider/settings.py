@@ -93,7 +93,7 @@ FEED_FORMAT='CSV'
 #LOG_FILE= os.path.join(os.path.dirname(os.path.abspath(__file__)),'spider.log')
 LOG_ENABLED = True
 LOG_ENCODING = 'GBK'
-LOG_LEVEL = logging.ERROR
+LOG_LEVEL = logging.DEBUG
 FEED_EXPORTERS ={
     u'file:///D:/scrapy/test.csv':'firstspider.spiders.test_spider'
 }

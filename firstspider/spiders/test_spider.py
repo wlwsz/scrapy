@@ -3,6 +3,7 @@ from firstspider.items import FirstspiderItem
 from scrapy.http import Request
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
+from scrapy.exceptions import CloseSpider
 import logging
 import json
 import time
@@ -76,7 +77,9 @@ class PaiTomorrow(scrapy.Spider):
                 item['desc'] = titem['itemName'].encode('gbk')
                 yield item
         else:
-            logger.error("fail!!!")
+            raise CloseSpider("no items!")
+            #logger.error("There is no more item!")
+            
                 
 
 
