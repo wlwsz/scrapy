@@ -4,6 +4,7 @@ from scrapy.http import Request
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +53,25 @@ class PaiTomorrow(scrapy.Spider):
             item['desc'] = [t.encode('gbk') for t in desc]
             logger.info(item) 
             yield item
+        for i in range(10):
+            url = "http://pai.suning.com/shanpai/tomorrow/find.htm?section=%s" %i
+            yield Request(url,callback=self.parse_next)
+    def parse_next(self,response):
+        item = FirstspiderItem()
+        itemdict = json.loads(response.body)
+        #logger.info(response.body)
+        if itemdict['result']['list']:
+            itemlist = itemdict['result']['list']
+            for titem in itemlist:
+                item['title'] = titem['itemName'].encode('gbk')
+                item['link'] ="http://pai.suning.com/shanpai/detail/d/%s-2.htm" %titem['itemId']
+                item['desc'] = titem['itemName'].encode('gbk')
+                yield item
+        else:
+            logger.error("fail!!!")
+                
+
+
 
         
              

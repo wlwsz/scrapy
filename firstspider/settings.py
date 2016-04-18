@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
-
+import time
+import os.path
+from firstspider.spiders.test_spider import PaiToday
 # Scrapy settings for firstspider project
 #
 # For simplicity, this file contains only settings considered important or
@@ -84,8 +86,10 @@ NEWSPIDER_MODULE = 'firstspider.spiders'
 #HTTPCACHE_DIR='httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES=[]
 #HTTPCACHE_STORAGE='scrapy.extensions.httpcache.FilesystemCacheStorage'
-FEED_URI=u'file:///D:/scrapy/test.csv'
+timestr = time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime())
+FEED_URI='file:///D:/scrapy/%(name)s_%(time)s.csv' %{'time':timestr,'name':PaiToday.name}
 FEED_FORMAT='CSV'
+#LOG_FILE= os.path.join(os.path.dirname(os.path.abspath(__file__)),'spider.log')
 LOG_ENABLED = True
 LOG_ENCODING = 'GBK'
 LOG_LEVEL = logging.DEBUG
