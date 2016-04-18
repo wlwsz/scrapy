@@ -5,8 +5,11 @@ from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 import logging
 import json
+import time
+import os.path
 
 logger = logging.getLogger(__name__)
+timestr = time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime())
 
 class PaiToday(scrapy.Spider):
     name = "test"
@@ -41,6 +44,11 @@ class PaiTomorrow(scrapy.Spider):
     start_urls = [
         "http://pai.suning.com/shanpai/tomorrow.htm"
     ]
+    csvurl = os.path.join(os.path.dirname(os.path.abspath(__file__)),'%(name)s_%(time)s.csv') \
+            %{'time':timestr,'name':name}
+    custom_settings = {
+        'FEED_URI': 'file:///%s' %csvurl,
+    }
 
     def parse(self,response):
         item = FirstspiderItem()

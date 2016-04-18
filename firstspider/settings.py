@@ -87,12 +87,13 @@ NEWSPIDER_MODULE = 'firstspider.spiders'
 #HTTPCACHE_IGNORE_HTTP_CODES=[]
 #HTTPCACHE_STORAGE='scrapy.extensions.httpcache.FilesystemCacheStorage'
 timestr = time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime())
-FEED_URI='file:///D:/scrapy/%(name)s_%(time)s.csv' %{'time':timestr,'name':PaiToday.name}
+csvurl = os.path.join(os.path.dirname(os.path.abspath(__file__)),'%(name)s_%(time)s.csv') %{'time':timestr,'name':PaiToday.name}
+FEED_URI='file:///%s' %csvurl
 FEED_FORMAT='CSV'
 #LOG_FILE= os.path.join(os.path.dirname(os.path.abspath(__file__)),'spider.log')
 LOG_ENABLED = True
 LOG_ENCODING = 'GBK'
-LOG_LEVEL = logging.DEBUG
+LOG_LEVEL = logging.ERROR
 FEED_EXPORTERS ={
     u'file:///D:/scrapy/test.csv':'firstspider.spiders.test_spider'
 }
