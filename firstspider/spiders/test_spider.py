@@ -3,7 +3,7 @@ from firstspider.items import FirstspiderItem
 from scrapy.http import Request
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
-from scrapy.exceptions import CloseSpider
+from scrapy.exceptions import CloseSpider,DropItem
 import logging
 import json
 import time
@@ -13,12 +13,16 @@ logger = logging.getLogger(__name__)
 timestr = time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime())
 
 class PaiToday(scrapy.Spider):
-    name = "test"
+    name = "PaiToday"
     allowed_domains = ["suning.com"]
     start_urls = [
-        "http://pai.suning.com"
-        
+        "http://pai.suning.com"   
     ]
+    csvurl = os.path.join(os.path.dirname(os.path.abspath(__file__)),'%(name)s_%(time)s.csv') \
+            %{'time':timestr,'name':name}
+    custom_settings = {
+        'FEED_URI': 'file:///%s' %csvurl,
+    }
 
     def parse(self,response):
         filename = response.url.split('/')[-2] + ".html"
@@ -40,7 +44,7 @@ class PaiToday(scrapy.Spider):
             logger.info(item) 
             yield item
 class PaiTomorrow(scrapy.Spider):
-    name = 'test2'
+    name = 'PaiTomorrow'
     allowed_domains = ["suning.com"]
     start_urls = [
         "http://pai.suning.com/shanpai/tomorrow.htm"
@@ -60,9 +64,12 @@ class PaiTomorrow(scrapy.Spider):
             item['title'] = [t.encode('gbk') for t in title]
             item['link'] = [t.encode('gbk') for t in link]
             item['desc'] = [t.encode('gbk') for t in desc]
-            logger.info(item) 
-            yield item
-        for i in range(10):
+            if "{{itemName}}" in item['title']:
+                #raise DropItem('not a item!')
+                pass
+            else:
+                yield item
+        for i in range(1,10):
             url = "http://pai.suning.com/shanpai/tomorrow/find.htm?section=%s" %i
             yield Request(url,callback=self.parse_next)
     def parse_next(self,response):

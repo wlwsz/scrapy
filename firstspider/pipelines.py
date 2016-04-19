@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from scrapy.exceptions import DropItem
+from scrapy.exporters import CsvItemExporter
 
 # Define your item pipelines here
 #
@@ -8,4 +10,7 @@
 
 class FirstspiderPipeline(object):
     def process_item(self, item, spider):
-        return item
+        if "{{" in item['link']:
+            raise DropItem('not a item')
+        else:
+            return item
