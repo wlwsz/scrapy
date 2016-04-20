@@ -1,5 +1,5 @@
 import scrapy
-from firstspider.items import FirstspiderItem
+#from firstspider.items import FirstspiderItem
 from scrapy.http import Request
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
@@ -11,6 +11,13 @@ import os.path
 
 logger = logging.getLogger(__name__)
 timestr = time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime())
+
+class FirstspiderItem(scrapy.Item):
+    # define the fields for your item here like:
+    # name = scrapy.Field()
+    title = scrapy.Field()
+    link = scrapy.Field()
+    desc = scrapy.Field()
 
 class PaiToday(scrapy.Spider):
     name = "PaiToday"
@@ -86,6 +93,12 @@ class PaiTomorrow(scrapy.Spider):
         else:
             raise CloseSpider("no items!")
             #logger.error("There is no more item!")
+
+if __name__ == '__main__':
+    process = CrawlerProcess(get_project_settings())
+    process.crawl(PaiToday)
+    process.crawl(PaiTomorrow)
+    process.start()
             
                 
 
