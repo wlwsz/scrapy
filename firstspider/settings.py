@@ -87,10 +87,10 @@ ITEM_PIPELINES = {
 #HTTPCACHE_STORAGE='scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 csvurl = os.path.join(os.path.dirname(os.path.abspath(__file__)),'%(name)s_%(time)s.csv') 
-FEED_URI='file:///%s' %csvurl
+#FEED_URI='file:///%s' %csvurl
 FEED_FORMAT='CSV'
 #LOG_FILE= os.path.join(os.path.dirname(os.path.abspath(__file__)),'spider.log')
 LOG_ENABLED = True
 LOG_ENCODING = 'GBK'
 LOG_LEVEL = logging.DEBUG
-FEED_EXPORTERS ={}
+#FEED_EXPORTERS ={}

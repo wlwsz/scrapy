@@ -1,5 +1,5 @@
 import scrapy
-#from firstspider.items import FirstspiderItem
+from firstspider.items import FirstspiderItem
 from scrapy.http import Request
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
@@ -11,25 +11,25 @@ import os.path
 
 logger = logging.getLogger(__name__)
 timestr = time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime())
-
+'''
 class FirstspiderItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
     title = scrapy.Field()
     link = scrapy.Field()
     desc = scrapy.Field()
-
+'''
 class PaiToday(scrapy.Spider):
     name = "PaiToday"
     allowed_domains = ["suning.com"]
     start_urls = [
         "http://pai.suning.com"   
     ]
+    '''
     csvurl = os.path.join(os.path.dirname(os.path.abspath(__file__)),'%(name)s_%(time)s.csv') \
             %{'time':timestr,'name':name}
     custom_settings = {
         'FEED_URI': 'file:///%s' %csvurl,
     }
+    '''
 
     def parse(self,response):
         filename = response.url.split('/')[-2] + ".html"
@@ -40,15 +40,15 @@ class PaiToday(scrapy.Spider):
             yield Request(url + cateid,callback=self.parse_content)
 
     def parse_content(self,response):
-        for sel in response.xpath('//h2[@class="pr"]'):
+        for sel in response.xpath('//div[@class="list-text"]'):
             item = FirstspiderItem()
-            title = sel.xpath('a/text()').extract()
-            desc = sel.xpath('a/@title').extract()
-            link = sel.xpath('a/@href').extract()
-            item['title'] = [t.encode("gbk") for t in title]    #solving the encodeing problem when export to csv 
-            item['desc'] = [t.encode("gbk") for t in desc]
-            item['link'] = [t.encode("gbk") for t in link]
-            logger.info(item) 
+            title = sel.xpath('h2[@class="pr"]/a/@title').extract()
+            desc = sel.xpath('p[@class="list-prompt"]/@title').extract()
+            link = sel.xpath('h2[@class="pr"]/a/@href').extract()
+            item['title'] = [t.encode("utf-8") for t in title]    #solving the encodeing problem when export to csv 
+            item['desc'] = [t.encode("utf-8") for t in desc]
+            item['link'] = [t.encode("utf-8") for t in link]
+            #logger.info(item) 
             yield item
 class PaiTomorrow(scrapy.Spider):
     name = 'PaiTomorrow'
