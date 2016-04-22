@@ -25,15 +25,21 @@ class FirstspiderPipeline(object):
             use_unicode = True
             )
     def process_item(self, item, spider):
-        logger.info("ready to insert!")
-        d = self.dbpool.runInteraction(self.insert_item,item)
+        
+        d = self.dbpool.runInteraction(self.insert_item,*(item,spider))
         d.addErrback(self.handle_err)
         return d
 
-    def insert_item(self,conn,item):
-        #conn.execute('''delete from item_today''')
-        conn.execute('''insert into item_today (ITEM_NAME,ITEM_DESC,ITEM_LINK) values (%s,%s,%s)''', (item['title'],item['desc'],item['link']))
+    def insert_item(self,conn,item,spider):
+        logger.info("ready to insert!")
+        if spider.name == 'PaiToday':
+            logger.info(spider.name)
+            conn.execute('''insert into item_today (ITEM_NAME,ITEM_DESC,ITEM_LINK) values (%s,%s,%s)''',\
+             (item['title'],item['desc'],item['link']))
+        elif spider.name == 'PaiTomorrow':
+            conn.execute('''insert into item_tommorrow (ITEM_NAME,ITEM_DESC,ITEM_LINK) values (%s,%s,%s)''',\
+             (item['title'],item['desc'],item['link']))
         logger.info("insert complete!")
 
     def handle_err(self,e):
-        logger.error('fail!')
+        logger.error(e)

@@ -1,5 +1,5 @@
 import scrapy
-from firstspider.items import FirstspiderItem
+#from firstspider.items import FirstspiderItem
 from scrapy.http import Request
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
@@ -11,12 +11,12 @@ import os.path
 
 logger = logging.getLogger(__name__)
 timestr = time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime())
-'''
+
 class FirstspiderItem(scrapy.Item):
     title = scrapy.Field()
     link = scrapy.Field()
     desc = scrapy.Field()
-'''
+
 class PaiToday(scrapy.Spider):
     name = "PaiToday"
     allowed_domains = ["suning.com"]
@@ -56,11 +56,13 @@ class PaiTomorrow(scrapy.Spider):
     start_urls = [
         "http://pai.suning.com/shanpai/tomorrow.htm"
     ]
+    '''
     csvurl = os.path.join(os.path.dirname(os.path.abspath(__file__)),'%(name)s_%(time)s.csv') \
             %{'time':timestr,'name':name}
     custom_settings = {
         'FEED_URI': 'file:///%s' %csvurl,
     }
+    '''
 
     def parse(self,response):
         item = FirstspiderItem()
@@ -68,9 +70,9 @@ class PaiTomorrow(scrapy.Spider):
             title = sel.xpath('a/@title').extract()
             link = sel.xpath('a/@href').extract()
             desc = sel.xpath('a/@title').extract()
-            item['title'] = [t.encode('gbk') for t in title]
-            item['link'] = [t.encode('gbk') for t in link]
-            item['desc'] = [t.encode('gbk') for t in desc]
+            item['title'] = [t.encode('utf-8') for t in title]
+            item['link'] = [t.encode('utf-8') for t in link]
+            item['desc'] = [t.encode('utf-8') for t in desc]
             if "{{itemName}}" in item['title']:
                 #raise DropItem('not a item!')
                 pass
@@ -86,9 +88,9 @@ class PaiTomorrow(scrapy.Spider):
         if itemdict['result']['list']:
             itemlist = itemdict['result']['list']
             for titem in itemlist:
-                item['title'] = titem['itemName'].encode('gbk')
+                item['title'] = titem['itemName'].encode('utf-8')
                 item['link'] ="http://pai.suning.com/shanpai/detail/d/%s-2.htm" %titem['itemId']
-                item['desc'] = titem['itemName'].encode('gbk')
+                item['desc'] = titem['itemName'].encode('utf-8')
                 yield item
         else:
             raise CloseSpider("no items!")
