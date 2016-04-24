@@ -63,9 +63,9 @@ NEWSPIDER_MODULE = 'firstspider.spiders'
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {
-   'firstspider.pipelines.FirstspiderPipeline': 300,
-}
+#ITEM_PIPELINES = {
+#   'firstspider.pipelines.FirstspiderPipeline': 300,
+#}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -87,7 +87,7 @@ ITEM_PIPELINES = {
 #HTTPCACHE_STORAGE='scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 csvurl = os.path.join(os.path.dirname(os.path.abspath(__file__)),'%(name)s_%(time)s.csv') 
-#FEED_URI='file:///%s' %csvurl
+FEED_URI='file:///%s' %csvurl
 FEED_FORMAT='CSV'
 #LOG_FILE= os.path.join(os.path.dirname(os.path.abspath(__file__)),'spider.log')
 LOG_ENABLED = True

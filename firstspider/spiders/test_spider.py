@@ -1,21 +1,29 @@
+#-*- coding: UTF-8 -*-
 import scrapy
-#from firstspider.items import FirstspiderItem
 from scrapy.http import Request
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 from scrapy.exceptions import CloseSpider,DropItem
+from scrapy.spiders import CrawlSpider,Rule
+from scrapy.linkextractors import LinkExtractor
 import logging
+import sys
 import json
 import time
 import os.path
 
+#dong tai tianjia items.py dao sys.path yun xing jie shu hou zidong xiaoshi
+try:
+    itempath = os.path.dirname(os.path.dirname(__file__))
+    #print itempath
+    sys.path.append(itempath)
+    #print sys.path
+    from items import FirstspiderItem
+except Exception, e:
+    raise ImportError("import items failed!")
+
 logger = logging.getLogger(__name__)
 timestr = time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime())
-
-class FirstspiderItem(scrapy.Item):
-    title = scrapy.Field()
-    link = scrapy.Field()
-    desc = scrapy.Field()
 
 class PaiToday(scrapy.Spider):
     name = "PaiToday"
@@ -23,14 +31,13 @@ class PaiToday(scrapy.Spider):
     start_urls = [
         "http://pai.suning.com"   
     ]
-    '''
+    
     csvurl = os.path.join(os.path.dirname(os.path.abspath(__file__)),'%(name)s_%(time)s.csv') \
             %{'time':timestr,'name':name}
     custom_settings = {
         'FEED_URI': 'file:///%s' %csvurl,
     }
-    '''
-
+    
     def parse(self,response):
         filename = response.url.split('/')[-2] + ".html"
         cateIDlist = response.xpath('//span[@class="t-span"]/@cateid').extract()
@@ -56,13 +63,13 @@ class PaiTomorrow(scrapy.Spider):
     start_urls = [
         "http://pai.suning.com/shanpai/tomorrow.htm"
     ]
-    '''
+
     csvurl = os.path.join(os.path.dirname(os.path.abspath(__file__)),'%(name)s_%(time)s.csv') \
             %{'time':timestr,'name':name}
     custom_settings = {
         'FEED_URI': 'file:///%s' %csvurl,
     }
-    '''
+    
 
     def parse(self,response):
         item = FirstspiderItem()
@@ -95,11 +102,54 @@ class PaiTomorrow(scrapy.Spider):
         else:
             raise CloseSpider("no items!")
             #logger.error("There is no more item!")
+class TestSpider(CrawlSpider):
+    """docstring for TestSpider"""
+    name = 'test'
+    allowed_domains = "suning.com"
+    start_urls = [
+        "http://www.suning.com",
+        "http://pindao.suning.com/city/diannao.htm"
+    ]
+    rules = [
+        Rule(LinkExtractor(allow=("city/.+\.htm"),),callback='parse_link'),
+
+    ]
+    csvurl = os.path.join(os.path.dirname(os.path.abspath(__file__)),'%(name)s_%(time)s.csv') \
+            %{'time':timestr,'name':name}
+    custom_settings = {
+        'FEED_URI': 'file:///%s' %csvurl,
+    }
+
+    def parse(self,response):
+        logger.info(response.url)
+        item = FirstspiderItem()
+        for sel in response.xpath('//div[@class="product-list"]'):
+            title = sel.xpath('ul/li/a/@title').extract()
+            link = sel.xpath('ul/li/a/@href').extract()
+            item['title'] = [t.encode('gbk') for t in title]
+            item['link'] = [t.encode('gbk') for t in link]
+            item['desc'] = [t.encode('gbk') for t in title]
+            yield item
+
+    def parse_link(self,response):
+        logger.info(response.url)
+        item = FirstspiderItem()
+        for sel in response.xpath('//div[@class="product-list"]'):
+            title = sel.xpath('ul/li/a/@title').extract()
+            link = sel.xpath('ul/li/a/@href').extract()
+            item['title'] = [t.encode('gbk') for t in title]
+            item['link'] = [t.encode('gbk') for t in link]
+            item['desc'] = [t.encode('gbk') for t in title]
+            yield item
+        
 
 if __name__ == '__main__':
+    #ding yi zai tong yi ge jin cheng zhong yun xing liang ge spider, ke yi zhi jie qi dong
+    #bu yong zai ming ling hang zhong tong guo 'scrapy crawl spidername' qi dong pa chong
     process = CrawlerProcess(get_project_settings())
-    process.crawl(PaiToday)
-    process.crawl(PaiTomorrow)
+    #process.crawl(PaiToday)
+    #process.crawl(PaiTomorrow)
+    process.crawl(TestSpider)
     process.start()
             
                 
