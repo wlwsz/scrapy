@@ -12,7 +12,7 @@ import json
 import time
 import os.path
 
-#dong tai tianjia items.py dao sys.path yun xing jie shu hou zidong xiaoshi
+#add moudle items into sys.path  
 try:
     itempath = os.path.dirname(os.path.dirname(__file__))
     #print itempath
@@ -107,48 +107,40 @@ class TestSpider(CrawlSpider):
     name = 'test'
     allowed_domains = "suning.com"
     start_urls = [
-        "http://www.suning.com",
-        "http://pindao.suning.com/city/diannao.htm"
+        #"https://movie.douban.com/top250", #403 not resolved
+        #"http://pindao.suning.com/city/diannao.htm",
+        "http://list.suning.com/0-258004-0.html"
     ]
+
     rules = [
-        Rule(LinkExtractor(allow=("city/.+\.htm"),),callback='parse_link'),
+        Rule(LinkExtractor(allow=(u"http://product\.suning\.com/\d+\.html",)),callback="parse_test"),
 
     ]
+    '''
     csvurl = os.path.join(os.path.dirname(os.path.abspath(__file__)),'%(name)s_%(time)s.csv') \
             %{'time':timestr,'name':name}
     custom_settings = {
         'FEED_URI': 'file:///%s' %csvurl,
     }
-
+    '''
     def parse(self,response):
+        logger.info("crawled URL below:")
         logger.info(response.url)
+    def parse_test(self,response):
         item = FirstspiderItem()
-        for sel in response.xpath('//div[@class="product-list"]'):
-            title = sel.xpath('ul/li/a/@title').extract()
-            link = sel.xpath('ul/li/a/@href').extract()
-            item['title'] = [t.encode('gbk') for t in title]
-            item['link'] = [t.encode('gbk') for t in link]
-            item['desc'] = [t.encode('gbk') for t in title]
-            yield item
-
-    def parse_link(self,response):
-        logger.info(response.url)
-        item = FirstspiderItem()
-        for sel in response.xpath('//div[@class="product-list"]'):
-            title = sel.xpath('ul/li/a/@title').extract()
-            link = sel.xpath('ul/li/a/@href').extract()
-            item['title'] = [t.encode('gbk') for t in title]
-            item['link'] = [t.encode('gbk') for t in link]
-            item['desc'] = [t.encode('gbk') for t in title]
-            yield item
+        title = sel.xpath('//h1[@id="itemDisplayName"]/text()').extract()
+        link = sel.xpath('//dd[@id="netPrice"]/del/text()').extract()
+        item['title'] = [t.encode('gbk') for t in title]
+        item['link'] = [t.encode('gbk') for t in link]
+        item['desc'] = [t.encode('gbk') for t in title]
+        return item
         
 
 if __name__ == '__main__':
-    #ding yi zai tong yi ge jin cheng zhong yun xing liang ge spider, ke yi zhi jie qi dong
-    #bu yong zai ming ling hang zhong tong guo 'scrapy crawl spidername' qi dong pa chong
+    #define process to run spiders in the current script file 
     process = CrawlerProcess(get_project_settings())
-    #process.crawl(PaiToday)
-    #process.crawl(PaiTomorrow)
+    process.crawl(PaiToday)
+    process.crawl(PaiTomorrow)
     process.crawl(TestSpider)
     process.start()
             
