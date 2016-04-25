@@ -54,7 +54,7 @@ DOWNLOADER_MIDDLEWARES = {
 #    'firstspider.middlewares.MyCustomDownloaderMiddleware': 543,
     'scrapy_crawlera.CrawleraMiddleware': 600 ,
 }
-DOWNLOAD_DELAY = 10
+#DOWNLOAD_DELAY = 3
 DOWNLOAD_TIMEOUT = 600
 CRAWLERA_ENABLED = False
 CRAWLERA_USER = '3b187fa819cd4a149d2c328e6c83a97e'

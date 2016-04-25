@@ -102,34 +102,39 @@ class PaiTomorrow(scrapy.Spider):
         else:
             raise CloseSpider("no items!")
             #logger.error("There is no more item!")
-class TestSpider(CrawlSpider):
-    """docstring for TestSpider"""
-    name = 'test'
-    allowed_domains = "suning.com"
+class SuningProduct(CrawlSpider):
+    """docstring for SuningProduct"""
+    name = 'SuningProduct'
+    allowed_domains = [
+        "www.suning.com",
+        "product.suning.com",
+        "list.suning.com",
+    ]
     start_urls = [
         #"https://movie.douban.com/top250", #403 not resolved
         #"http://pindao.suning.com/city/diannao.htm",
         "http://list.suning.com/0-258004-0.html"
     ]
 
-    rules = [
-        Rule(LinkExtractor(allow=(u"http://product\.suning\.com/\d+\.html",)),callback="parse_test"),
+    rules = (
+        Rule(LinkExtractor(allow=(u"http://product\.suning\.com/\d+\.html",),),callback="parse_item",),
 
-    ]
+    )
     '''
     csvurl = os.path.join(os.path.dirname(os.path.abspath(__file__)),'%(name)s_%(time)s.csv') \
             %{'time':timestr,'name':name}
     custom_settings = {
         'FEED_URI': 'file:///%s' %csvurl,
     }
-    '''
+    
     def parse(self,response):
         logger.info("crawled URL below:")
         logger.info(response.url)
-    def parse_test(self,response):
+    '''
+    def parse_item(self,response):
         item = FirstspiderItem()
-        title = sel.xpath('//h1[@id="itemDisplayName"]/text()').extract()
-        link = sel.xpath('//dd[@id="netPrice"]/del/text()').extract()
+        title = response.xpath('//h1[@id="itemDisplayName"]/text()').extract()
+        link = response.xpath('//dd[@id="netPrice"]/del/text()').extract()
         item['title'] = [t.encode('gbk') for t in title]
         item['link'] = [t.encode('gbk') for t in link]
         item['desc'] = [t.encode('gbk') for t in title]
@@ -139,9 +144,9 @@ class TestSpider(CrawlSpider):
 if __name__ == '__main__':
     #define process to run spiders in the current script file 
     process = CrawlerProcess(get_project_settings())
-    process.crawl(PaiToday)
-    process.crawl(PaiTomorrow)
-    process.crawl(TestSpider)
+    #process.crawl(PaiToday)
+    #process.crawl(PaiTomorrow)
+    process.crawl(SuningProduct)
     process.start()
             
                 
