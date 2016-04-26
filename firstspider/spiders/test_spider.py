@@ -18,7 +18,7 @@ try:
     #print itempath
     sys.path.append(itempath)
     #print sys.path
-    from items import FirstspiderItem
+    from items import FirstspiderItem,ProductSitItem
 except Exception, e:
     raise ImportError("import items failed!")
 
@@ -120,25 +120,50 @@ class SuningProduct(CrawlSpider):
         Rule(LinkExtractor(allow=(u"http://product\.suning\.com/\d+\.html",),),callback="parse_item",),
 
     )
-    '''
+    
     csvurl = os.path.join(os.path.dirname(os.path.abspath(__file__)),'%(name)s_%(time)s.csv') \
             %{'time':timestr,'name':name}
     custom_settings = {
         'FEED_URI': 'file:///%s' %csvurl,
     }
     
-    def parse(self,response):
+    def parse_start_url(self,response):
+        item = FirstspiderItem()
         logger.info("crawled URL below:")
         logger.info(response.url)
-    '''
+        return item
     def parse_item(self,response):
         item = FirstspiderItem()
         title = response.xpath('//h1[@id="itemDisplayName"]/text()').extract()
-        link = response.xpath('//dd[@id="netPrice"]/del/text()').extract()
+        link = response.xpath('//*[@id="proPriceBox"]/div/span/text()').extract()
+        logger.info(link)
         item['title'] = [t.encode('gbk') for t in title]
         item['link'] = [t.encode('gbk') for t in link]
-        item['desc'] = [t.encode('gbk') for t in title]
+        item['desc'] = response.url
         return item
+class ProductSit(scrapy.Spider):
+    name = "ProductSit"
+    allowed_domains = "productsit.cnsuning.com"
+    start_urls = [
+        "http://productsit.cnsuning.com/0000000000/120800000.html",
+    ]
+    def parse(self,response):
+        canbuy = response.xpath('//*[@id="buyNowAddCart"]/@name')
+        if canbuy and response.status==200:
+            item = ProductSitItem()
+            item['link'] = response.url
+            yield item
+        for product in range(120800001,120800019):
+            yield Request("http://productsit.cnsuning.com/0000000000/%s.html" %product,callback=self.parse_product,dont_filter=True)
+
+    def parse_product(self,response):
+        canbuy = response.xpath('//*[@id="buyNowAddCart/@name"]')
+        if canbuy and response.status==200:
+            item = ProductSitItem()
+            item['link'] = response.url
+            yield item
+        else:
+            self.log("can not use!",logging.ERROR)
         
 
 if __name__ == '__main__':
@@ -146,7 +171,8 @@ if __name__ == '__main__':
     process = CrawlerProcess(get_project_settings())
     #process.crawl(PaiToday)
     #process.crawl(PaiTomorrow)
-    process.crawl(SuningProduct)
+    #process.crawl(SuningProduct)
+    process.crawl(ProductSit)
     process.start()
             
                 

@@ -14,3 +14,7 @@ class FirstspiderItem(scrapy.Item):
     title = scrapy.Field()
     link = scrapy.Field()
     desc = scrapy.Field()
+
+class ProductSitItem(scrapy.Item):
+    proname = scrapy.Field()
+    link = scrapy.Field()
