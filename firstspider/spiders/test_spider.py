@@ -12,6 +12,7 @@ import json
 import time
 import os.path
 import requests
+import re
 
 #add moudle items into sys.path  
 try:
@@ -153,17 +154,17 @@ class ProductSit(scrapy.Spider):
             item = ProductSitItem()
             item['link'] = response.url
             yield item
-        for product in range(120800001,120800019):
+        for product in range(120800001,120899999):
             yield Request("http://icpssit.cnsuning.com/icps-web/getAllPriceFourPage/000000000%s_0000000000_010_0250101_1_pc_showSaleStatus.vhtm?callback=showSaleStatus" \
              %product,callback=self.parse_product,dont_filter=True)
 
     def parse_product(self,response):
-        self.log(response.body)
-        invstatusjson = json.loads(response.body)
-        self.log(invstatusjson)
-        invstatus = invstatusjson['saleInfo'][0]['invStatus']
-        if invstatus == 1:
-            productid = invstatusjson['saleInfo'][0]['partNumber'][-9:-1]
+        rlist = re.split('[\(\)]',response.body)
+        rdict = json.loads(rlist[1])
+        invstatus = rdict['saleInfo'][0]['invStatus']
+        self.log(type(invstatus))
+        if response.status==200 and invstatus == "1":
+            productid = rdict['saleInfo'][0]['partNumber'][-9:]
             item = ProductSitItem()
             item['link'] = "http://productsit.cnsuning.com/0000000000/%s.html" %productid
             yield item
