@@ -11,11 +11,11 @@ import sys
 import json
 import time
 import os.path
+import requests
 
 #add moudle items into sys.path  
 try:
     itempath = os.path.dirname(os.path.dirname(__file__))
-    #print itempath
     sys.path.append(itempath)
     #print sys.path
     from items import FirstspiderItem,ProductSitItem
@@ -154,13 +154,18 @@ class ProductSit(scrapy.Spider):
             item['link'] = response.url
             yield item
         for product in range(120800001,120800019):
-            yield Request("http://productsit.cnsuning.com/0000000000/%s.html" %product,callback=self.parse_product,dont_filter=True)
+            yield Request("http://icpssit.cnsuning.com/icps-web/getAllPriceFourPage/000000000%s_0000000000_010_0250101_1_pc_showSaleStatus.vhtm?callback=showSaleStatus" \
+             %product,callback=self.parse_product,dont_filter=True)
 
     def parse_product(self,response):
-        canbuy = response.xpath('//*[@id="buyNowAddCart/@name"]')
-        if canbuy and response.status==200:
+        self.log(response.body)
+        invstatusjson = json.loads(response.body)
+        self.log(invstatusjson)
+        invstatus = invstatusjson['saleInfo'][0]['invStatus']
+        if invstatus == 1:
+            productid = invstatusjson['saleInfo'][0]['partNumber'][-9:-1]
             item = ProductSitItem()
-            item['link'] = response.url
+            item['link'] = "http://productsit.cnsuning.com/0000000000/%s.html" %productid
             yield item
         else:
             self.log("can not use!",logging.ERROR)
