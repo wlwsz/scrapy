@@ -154,7 +154,7 @@ class ProductSit(scrapy.Spider):
             item = ProductSitItem()
             item['link'] = response.url
             yield item
-        for product in range(120800001,120899999):
+        for product in xrange(120800001,120899999):
             yield Request("http://icpssit.cnsuning.com/icps-web/getAllPriceFourPage/000000000%s_0000000000_010_0250101_1_pc_showSaleStatus.vhtm?callback=showSaleStatus" \
              %product,callback=self.parse_product,dont_filter=True)
 
@@ -162,14 +162,15 @@ class ProductSit(scrapy.Spider):
         rlist = re.split('[\(\)]',response.body)
         rdict = json.loads(rlist[1])
         invstatus = rdict['saleInfo'][0]['invStatus']
-        self.log(type(invstatus))
+        #self.log(type(invstatus))
         if response.status==200 and invstatus == "1":
             productid = rdict['saleInfo'][0]['partNumber'][-9:]
             item = ProductSitItem()
             item['link'] = "http://productsit.cnsuning.com/0000000000/%s.html" %productid
             yield item
         else:
-            self.log("can not use!",logging.ERROR)
+            #self.log("can not use!",logging.ERROR)
+            pass
         
 
 if __name__ == '__main__':
