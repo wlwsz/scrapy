@@ -56,15 +56,17 @@ class PaiToday(scrapy.Spider):
         url='http://pai.suning.com/shanpai/channel/reloadChooseTabData.htm?cateId='
         for cateid in cateIDlist:
             logger.info(url+cateid)
-            #yield scrapy.Request(url + cateid,callback=self.parse_content,meta=meta,dont_filter=True)  #add splash meta,same effect with below
-            yield SplashRequest(url + cateid,callback=self.parse_content,dont_filter=True)      #invoke splashrequest
+            #添加splash的meta参数，请求通过splash的render.html渲染页面
+            #yield scrapy.Request(url + cateid,callback=self.parse_content,meta=meta,dont_filter=True)  
+            #直接调用splashrequest来渲染页面，该函数实际上是对scrapy api的二次封装
+            yield SplashRequest(url + cateid,callback=self.parse_content,dont_filter=True)     
     def parse_content(self,response):
         for sel in response.xpath('//div[@class="list-text"]'):
             item = FirstspiderItem()
             title = sel.xpath('h2[@class="pr"]/a/@title').extract()
             desc = sel.xpath('p[@class="list-prompt"]/@title').extract()
             link = sel.xpath('h2[@class="pr"]/a/@href').extract()
-            item['title'] = [t.encode("gbk") for t in title]    #solving the encodeing problem when export to csv 
+            item['title'] = [t.encode("gbk") for t in title]    #解决编码问题
             item['desc'] = [t.encode("gbk") for t in desc]
             item['link'] = [t.encode("gbk") for t in link]
             #logger.info(item) 
@@ -123,7 +125,7 @@ class SuningProduct(CrawlSpider):
         "list.suning.com",
     ]
     start_urls = [
-        #"https://movie.douban.com/top250", #403 not resolved
+        #"https://movie.douban.com/top250", #返回403有防爬虫机制，爬虫被ban需要设置代理
         #"http://pindao.suning.com/city/diannao.htm",
         "http://list.suning.com/0-258004-0.html"
     ]
@@ -185,7 +187,7 @@ class ProductSit(scrapy.Spider):
         
 
 if __name__ == '__main__':
-    #define process to run spiders in the current script file 
+    #定一个爬虫进程，方便在脚本中启动脚本，并可以在一个进程中同时启动多个爬虫
     process = CrawlerProcess(get_project_settings())
     process.crawl(PaiToday)
     #process.crawl(PaiTomorrow)
