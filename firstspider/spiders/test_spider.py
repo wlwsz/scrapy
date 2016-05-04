@@ -1,4 +1,4 @@
-#-*- coding: UTF-8 -*-
+#-*- coding: utf-8 -*-
 import scrapy
 from scrapy.http import Request
 from scrapy.crawler import CrawlerProcess
@@ -6,6 +6,8 @@ from scrapy.utils.project import get_project_settings
 from scrapy.exceptions import CloseSpider,DropItem
 from scrapy.spiders import CrawlSpider,Rule
 from scrapy.linkextractors import LinkExtractor
+from scrapy_splash import SplashRequest
+from scrapy_splash import SplashMiddleware
 import logging
 import sys
 import json
@@ -14,17 +16,29 @@ import os.path
 import requests
 import re
 
-#add moudle items into sys.path  
+#动态添加items到python环境变量中，仅在程序运行时有效
 try:
     itempath = os.path.dirname(os.path.dirname(__file__))
     sys.path.append(itempath)
     #print sys.path
     from items import FirstspiderItem,ProductSitItem
+    import settings
 except Exception, e:
     raise ImportError("import items failed!")
 
 logger = logging.getLogger(__name__)
 timestr = time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime())
+basedir = os.path.join(settings.BASEDIR,'%(name)s_%(time)s.csv') 
+meta = {
+        'splash':{
+            'endpoint':'render.html',
+            'args':{
+                'wait':10,
+                'images':1,
+                'render_all':1
+                }
+            }
+        }
 
 class PaiToday(scrapy.Spider):
     name = "PaiToday"
@@ -32,30 +46,27 @@ class PaiToday(scrapy.Spider):
     start_urls = [
         "http://pai.suning.com"   
     ]
-    
-    csvurl = os.path.join(os.path.dirname(os.path.abspath(__file__)),'%(name)s_%(time)s.csv') \
-            %{'time':timestr,'name':name}
+    csvurl = basedir %{'time':timestr,'name':name}      
     custom_settings = {
         'FEED_URI': 'file:///%s' %csvurl,
-    }
-    
+    }   
     def parse(self,response):
         filename = response.url.split('/')[-2] + ".html"
-        cateIDlist = response.xpath('//span[@class="t-span"]/@cateid').extract()
+        cateIDlist = response.xpath('//span[contains(@class,"t-span")]/@cateid').extract()
         url='http://pai.suning.com/shanpai/channel/reloadChooseTabData.htm?cateId='
         for cateid in cateIDlist:
             logger.info(url+cateid)
-            yield Request(url + cateid,callback=self.parse_content)
-
+            #yield scrapy.Request(url + cateid,callback=self.parse_content,meta=meta,dont_filter=True)  #add splash meta,same effect with below
+            yield SplashRequest(url + cateid,callback=self.parse_content,dont_filter=True)      #invoke splashrequest
     def parse_content(self,response):
         for sel in response.xpath('//div[@class="list-text"]'):
             item = FirstspiderItem()
             title = sel.xpath('h2[@class="pr"]/a/@title').extract()
             desc = sel.xpath('p[@class="list-prompt"]/@title').extract()
             link = sel.xpath('h2[@class="pr"]/a/@href').extract()
-            item['title'] = [t.encode("utf-8") for t in title]    #solving the encodeing problem when export to csv 
-            item['desc'] = [t.encode("utf-8") for t in desc]
-            item['link'] = [t.encode("utf-8") for t in link]
+            item['title'] = [t.encode("gbk") for t in title]    #solving the encodeing problem when export to csv 
+            item['desc'] = [t.encode("gbk") for t in desc]
+            item['link'] = [t.encode("gbk") for t in link]
             #logger.info(item) 
             yield item
 class PaiTomorrow(scrapy.Spider):
@@ -65,7 +76,7 @@ class PaiTomorrow(scrapy.Spider):
         "http://pai.suning.com/shanpai/tomorrow.htm"
     ]
 
-    csvurl = os.path.join(os.path.dirname(os.path.abspath(__file__)),'%(name)s_%(time)s.csv') \
+    csvurl = os.path.join(basedir,'%(name)s_%(time)s.csv') \
             %{'time':timestr,'name':name}
     custom_settings = {
         'FEED_URI': 'file:///%s' %csvurl,
@@ -122,7 +133,7 @@ class SuningProduct(CrawlSpider):
 
     )
     
-    csvurl = os.path.join(os.path.dirname(os.path.abspath(__file__)),'%(name)s_%(time)s.csv') \
+    csvurl = os.path.join(basedir,'%(name)s_%(time)s.csv') \
             %{'time':timestr,'name':name}
     custom_settings = {
         'FEED_URI': 'file:///%s' %csvurl,
@@ -176,10 +187,10 @@ class ProductSit(scrapy.Spider):
 if __name__ == '__main__':
     #define process to run spiders in the current script file 
     process = CrawlerProcess(get_project_settings())
-    #process.crawl(PaiToday)
+    process.crawl(PaiToday)
     #process.crawl(PaiTomorrow)
     #process.crawl(SuningProduct)
-    process.crawl(ProductSit)
+    #process.crawl(ProductSit)
     process.start()
             
                 

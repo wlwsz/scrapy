@@ -15,7 +15,7 @@ BOT_NAME = 'firstspider'
 
 SPIDER_MODULES = ['firstspider.spiders']
 NEWSPIDER_MODULE = 'firstspider.spiders'
-
+BASEDIR = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'firstspider (+http://www.yourdomain.com)'
@@ -44,17 +44,25 @@ COOKIES_ENABLED=False
 
 # Enable or disable spider middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
-#SPIDER_MIDDLEWARES = {
+SPIDER_MIDDLEWARES = {
+    'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
 #    'firstspider.middlewares.MyCustomSpiderMiddleware': 543,
-#}
+         
+}
+SPLASH_URL = 'http://172.19.136.199:8050'
+DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
+HTTPCACHE_STORAGE = 'scrapy_splash.SplashAwareFSCacheStorage'
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
 #    'firstspider.middlewares.MyCustomDownloaderMiddleware': 543,
     'scrapy_crawlera.CrawleraMiddleware': 600 ,
+    'scrapy_splash.SplashCookiesMiddleware': 723,
+    'scrapy_splash.SplashMiddleware': 725,
+    'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810
 }
-#DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 1
 DOWNLOAD_TIMEOUT = 600
 CRAWLERA_ENABLED = False
 CRAWLERA_USER = '3b187fa819cd4a149d2c328e6c83a97e'

@@ -30,14 +30,14 @@ class FirstspiderPipeline(object):
         d.addErrback(self.handle_err)
         return d
 
-    def insert_item(self,conn,item,spider):
+    def insert_item(self,tx,item,spider):
         logger.info("ready to insert!")
         if spider.name == 'PaiToday':
             logger.info(spider.name)
-            conn.execute('''insert into item_today (ITEM_NAME,ITEM_DESC,ITEM_LINK) values (%s,%s,%s)''',\
+            tx.execute('''insert into item_today (ITEM_NAME,ITEM_DESC,ITEM_LINK) values (%s,%s,%s)''',\
              (item['title'],item['desc'],item['link']))
         elif spider.name == 'PaiTomorrow':
-            conn.execute('''insert into item_tommorrow (ITEM_NAME,ITEM_DESC,ITEM_LINK) values (%s,%s,%s)''',\
+            tx.execute('''insert into item_tommorrow (ITEM_NAME,ITEM_DESC,ITEM_LINK) values (%s,%s,%s)''',\
              (item['title'],item['desc'],item['link']))
         logger.info("insert complete!")
 
