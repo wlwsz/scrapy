@@ -62,7 +62,7 @@ DOWNLOADER_MIDDLEWARES = {
     'scrapy_splash.SplashMiddleware': 725,
     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810
 }
-DOWNLOAD_DELAY = 1
+#DOWNLOAD_DELAY = 1
 DOWNLOAD_TIMEOUT = 600
 CRAWLERA_ENABLED = False
 CRAWLERA_USER = '3b187fa819cd4a149d2c328e6c83a97e'
@@ -103,6 +103,11 @@ AUTOTHROTTLE_ENABLED=False
 csvurl = os.path.join(os.path.dirname(os.path.abspath(__file__)),'%(name)s_%(time)s.csv') 
 FEED_URI='file:///%s' %csvurl
 FEED_FORMAT='CSV'
+FEED_EXPORT_FIELDS=[
+    'title',
+    'desc',
+    'link'
+]
 #LOG_FILE= os.path.join(os.path.dirname(os.path.abspath(__file__)),'spider.log')
 LOG_ENABLED = True
 LOG_ENCODING = 'GBK'

@@ -57,9 +57,9 @@ class PaiToday(scrapy.Spider):
         for cateid in cateIDlist:
             logger.info(url+cateid)
             #添加splash的meta参数，请求通过splash的render.html渲染页面
-            #yield scrapy.Request(url + cateid,callback=self.parse_content,meta=meta,dont_filter=True)  
+            yield scrapy.Request(url + cateid,callback=self.parse_content,dont_filter=True)  
             #直接调用splashrequest来渲染页面，该函数实际上是对scrapy api的二次封装
-            yield SplashRequest(url + cateid,callback=self.parse_content,dont_filter=True)     
+            #yield SplashRequest(url + cateid,callback=self.parse_content,dont_filter=True)     
     def parse_content(self,response):
         for sel in response.xpath('//div[@class="list-text"]'):
             item = FirstspiderItem()
