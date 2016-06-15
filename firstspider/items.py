@@ -6,6 +6,8 @@
 # http://doc.scrapy.org/en/latest/topics/items.html
 
 import scrapy
+from scrapy_djangoitem import DjangoItem
+from mytest.models import ProductSitItem
 
 
 class FirstspiderItem(scrapy.Item):
@@ -18,3 +20,8 @@ class FirstspiderItem(scrapy.Item):
 class ProductSitItem(scrapy.Item):
     proname = scrapy.Field()
     link = scrapy.Field()
+
+
+class TestItem(DjangoItem):
+    """测试scrapy-djangoitem"""
+    django_model = ProductSitItem

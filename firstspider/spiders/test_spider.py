@@ -21,7 +21,7 @@ try:
     itempath = os.path.dirname(os.path.dirname(__file__))
     sys.path.append(itempath)
     #print sys.path
-    from items import FirstspiderItem,ProductSitItem
+    from items import FirstspiderItem,ProductSitItem, TestItem
     import settings
 except Exception, e:
     raise ImportError("import items failed!")
@@ -182,17 +182,78 @@ class ProductSit(scrapy.Spider):
             item['link'] = "http://productsit.cnsuning.com/0000000000/%s.html" %productid
             yield item
         else:
-            #self.log("can not use!",logging.ERROR)
+            self.log("can not use!",logging.ERROR)
+            pass
+
+class ProductPre(scrapy.Spider):
+    name = "ProductPre"
+    allowed_domains = "productpre.cnsuning.com"
+    start_urls = [
+        "http://productpre.cnsuning.com/0000000000/121319156.html",
+    ]
+    def parse(self,response):
+        canbuy = response.xpath('//*[@id="buyNowAddCart"]/@name')
+        if canbuy and response.status==200:
+            item = ProductSitItem()
+            item['link'] = response.url
+            yield item
+        for product in xrange(121319157,121399999):
+            yield Request("http://icpspre.cnsuning.com/icps-web/getAllPriceFourPage/000000000%s_0000000000_010_0250101_1_pc_showSaleStatus.vhtm?callback=showSaleStatus" \
+             %product,callback=self.parse_product,dont_filter=True)
+
+    def parse_product(self,response):
+        rlist = re.split('[\(\)]',response.body)
+        rdict = json.loads(rlist[1])
+        invstatus = rdict['saleInfo'][0]['invStatus']
+        #self.log(type(invstatus))
+        if response.status==200 and invstatus == "1":
+            productid = rdict['saleInfo'][0]['partNumber'][-9:]
+            item = ProductSitItem()
+            item['link'] = "http://productpre.cnsuning.com/0000000000/%s.html" %productid
+            yield item
+        else:
+            self.log("can not use!",logging.ERROR)
+            pass
+
+class TestDjangoitem(scrapy.Spider):
+    name = "TestDjangoitem"
+    allowed_domains = "productsit.cnsuning.com"
+    start_urls = [
+        "http://productsit.cnsuning.com/0000000000/120800000.html",
+    ]
+    def parse(self,response):
+        canbuy = response.xpath('//*[@id="buyNowAddCart"]/@name')
+        if canbuy and response.status==200:
+            item = TestItem()
+            item['link'] = response.url
+            yield item
+        for product in xrange(120800001,120899999):
+            yield Request("http://icpssit.cnsuning.com/icps-web/getAllPriceFourPage/000000000%s_0000000000_010_0250101_1_pc_showSaleStatus.vhtm?callback=showSaleStatus" \
+             %product,callback=self.parse_product,dont_filter=True)
+
+    def parse_product(self,response):
+        rlist = re.split('[\(\)]',response.body)
+        rdict = json.loads(rlist[1])
+        invstatus = rdict['saleInfo'][0]['invStatus']
+        #self.log(type(invstatus))
+        if response.status==200 and invstatus == "1":
+            productid = rdict['saleInfo'][0]['partNumber'][-9:]
+            item = TestItem()
+            item['link'] = "http://productsit.cnsuning.com/0000000000/%s.html" %productid
+            yield item
+        else:
+            self.log("can not use!",logging.ERROR)
             pass
         
 
 if __name__ == '__main__':
     #定一个爬虫进程，方便在脚本中启动脚本，并可以在一个进程中同时启动多个爬虫
     process = CrawlerProcess(get_project_settings())
-    process.crawl(PaiToday)
+    #process.crawl(PaiToday)
     #process.crawl(PaiTomorrow)
     #process.crawl(SuningProduct)
     #process.crawl(ProductSit)
+    process.crawl(TestDjangoitem)
     process.start()
             
                 

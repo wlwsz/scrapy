@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 import logging
 import time
-import os.path
+import os
+import sys
+
+sys.path.append("D:\python_code\django-pai")
+os.environ['DJANGO_SETTINGS_MODULE'] = 'mytest.settings'
 # Scrapy settings for firstspider project
 #
 # For simplicity, this file contains only settings considered important or
@@ -103,11 +107,13 @@ AUTOTHROTTLE_ENABLED=False
 csvurl = os.path.join(os.path.dirname(os.path.abspath(__file__)),'%(name)s_%(time)s.csv') 
 FEED_URI='file:///%s' %csvurl
 FEED_FORMAT='CSV'
+'''
 FEED_EXPORT_FIELDS=[
     'title',
     'desc',
     'link'
 ]
+'''
 #LOG_FILE= os.path.join(os.path.dirname(os.path.abspath(__file__)),'spider.log')
 LOG_ENABLED = True
 LOG_ENCODING = 'GBK'

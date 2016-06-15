@@ -39,6 +39,8 @@ class FirstspiderPipeline(object):
         elif spider.name == 'PaiTomorrow':
             tx.execute('''insert into item_tommorrow (ITEM_NAME,ITEM_DESC,ITEM_LINK) values (%s,%s,%s)''',\
              (item['title'],item['desc'],item['link']))
+        elif spider.name == 'TestDjangoitem':
+            item.save()
         logger.info("insert complete!")
 
     def handle_err(self,e):
